@@ -116,3 +116,8 @@ const newScores = scores.map((score) =>
 );
 
 console.log("🚀 ~ newScores:", newScores);
+
+
+
+
+
