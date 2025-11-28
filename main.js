@@ -1,123 +1,83 @@
 //Bài 1
-console.log("Bài 1:");
-const myArr = [
-  [1, 2, 3],
-  [4, 5, 6],
-  [7, 8, 9],
-];
+let startTime;
+let endTime;
 
-const sumRowArr = myArr.map((item) => {
-  let sum = 0;
-  for (let i = 0; i < item.length; i++) {
-    sum += item[i];
-  }
-  return sum;
-});
-console.log("🚀 ~ sumRowArr:", sumRowArr);
-
-const sumColArr = [];
-for (let i = 0; i < myArr[0].length; i++) {
-  sumColArr[i] = myArr[0][i];
+function fetchUser() {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve("User Data"), 2000);
+  });
+}
+function fetchPosts() {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve("Post Data"), 3000);
+  });
+}
+function fetchComments() {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve("Comment Data"), 1000);
+  });
 }
 
-for (let i = 0; i < sumColArr.length; i++) {
-  for (let j = 1; j < myArr.length; j++) {
-    sumColArr[i] += myArr[j][i];
-  }
-}
-console.log("🚀 ~ sumColArr:", sumColArr);
+const arr = [fetchUser(), fetchPosts(), fetchComments()];
+startTime = new Date();
 
-const newArr = myArr.filter((item) => {
-  let sum = 0;
-  for (let i = 0; i < item.length; i++) {
-    sum += item[i];
-  }
-  return sum > 10;
+Promise.all(arr).then((data) => {
+  console.log("Bài 1: ");
+  //có reject thì gọi thêm catch
+  console.log(data);
+  endTime = new Date();
+  console.log(
+    `Thời gian chạy của các promise là: ${(endTime - startTime) / 1000}s`
+  );
 });
-
-console.log("🚀 ~ newArr:", newArr);
-console.log("================================");
 
 //Bài 2
-console.log("Bài 2:");
-const arrs = [
-  ["hello", "world"],
-  ["javascript", "php"],
-  ["css", "html"],
-];
-
-const upperArr = arrs.map((arr) => arr.map((item) => item.toLocaleUpperCase()));
-console.log("🚀 ~ upperArr:", upperArr);
-
-const newArrs = arrs.map((arr) => arr.filter((item) => item.length > 4));
-console.log("🚀 ~ newArrs:", newArrs);
-
-const flatArr = arrs.map((arr) => arr.join(", "));
-console.log("🚀 ~ flatArr:", flatArr);
-// Nếu array có nhiều cấp array lồng nhau thì có thể dùng đệ quy phi tuyến để giải quyết triệt để
-// const flatArr = [];
-// function flattenArr(arr) {
-//   for(let i = 0; i < arr.length; i++) {
-//     if(Array.isArray(arr[i])) {
-//       flattenArr(arr[i]);
-//     } else {
-//       flatArr.push(arr[i]);
-//     }
-//   }
-// }
-
-// flattenArr(arrs);
-// console.log("🚀 ~ flatArr:", flatArr);
-console.log("================================");
+function fetchFromServer1() {
+  return new Promise((resolve) =>
+    setTimeout(() => resolve("Server 1 Response"), 3000)
+  );
+}
+function fetchFromServer2() {
+  return new Promise((resolve) =>
+    setTimeout(() => resolve("Server 2 Response"), 2000)
+  );
+}
+function fetchFromServer3() {
+  return new Promise((resolve) =>
+    setTimeout(() => resolve("Server 3 Response"), 1000)
+  );
+}
+const arr1 = [fetchFromServer1(), fetchFromServer2(), fetchFromServer3()];
+Promise.race(arr1).then((data) => {
+  console.log("Bài 2:");
+  console.log(data);
+});
 
 //Bài 3
-console.log("Bài 3:");
-const otherArr = [
-  [2, 4, 6],
-  [8, 10, 12],
-  [14, 16, 18],
-];
+function retry(fn, times) {
+  console.log("Bài 3:");
+  return fn()
+    .then((data) => data)
+    .catch((error) => {
+      times--;
+      if (times >= 0) {
+        //Sau khi thất bại thì được chạy lại tối đa times lần
+        return retry(fn, times);
+      } else {
+        return error;
+      }
+    });
+}
+let failingPromise = () => {
+  return new Promise((resolve, reject) => {
+    Math.random() > 0.7 ? resolve("Thành công") : reject("Thất bại");
+  });
+};
 
-const mainDiagonalArr = otherArr.map((item, index) => item[index]);
-console.log("🚀 ~ mainDiagonalArr:", mainDiagonalArr);
-
-const secondaryDiagonalArr = otherArr.map(
-  (item, index) => item[item.length - 1 - index]
-);
-console.log("🚀 ~ secondaryDiagonalArr:", secondaryDiagonalArr);
-
-let sum = 0;
-mainDiagonalArr.concat(secondaryDiagonalArr).forEach((item) => (sum += item));
-console.log("🚀 ~ sum:", sum);
-console.log("================================");
-
-//Bài 4
-console.log("Bài 4:");
-const scores = [
-  [8, 9, 7], // học sinh 1
-  [6, 5, 7], // học sinh 2
-  [10, 9, 8], // học sinh 3
-];
-
-const averageScore = scores.map((score) => {
-  let sumAverage = 0;
-  for (let value of score) {
-    sumAverage += value;
-  }
-  return sumAverage / score.length;
-});
-console.log("🚀 ~ averageScore:", averageScore);
-
-const filterStudent = averageScore.filter((score) => score >= 8);
-console.log("🚀 ~ filterStudent:", filterStudent);
-
-const newScores = scores.map((score) =>
-  score.map((item) => (item < 10 ? item + 1 : item))
-);
-
-console.log("🚀 ~ newScores:", newScores);
-
-
-
-
-
+retry(failingPromise, 3)
+  .then((data) => {
+    console.log(data);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
